@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use crate::core::Program;
 
 #[derive(Debug)]
 pub struct Register {
     pub program: Program,
-    pub output_prime: u64, // which prime factor register should be used to determine output
+    pub output_base: u64, // which prime factor registers should be used to determine output
 }
 
 #[derive(Debug)]
@@ -30,7 +32,7 @@ impl Register {
         }
         return prime_factorized;
     }
-    fn convert(&self) -> (Vec<u64>, Vec<Instruction>, usize) {
+    fn convert(&self) -> (Vec<u64>, Vec<Instruction>, HashMap<usize, u64>) {
         let mut primes = Vec::new();
 
         let mut prime_to_index = |prime: u64| {
@@ -56,7 +58,6 @@ impl Register {
                 increment: num_pfs.iter().map(|x| (prime_to_index(x.0), x.1)).collect(),
             })
         }
-        println!("Prime layout: {:?}", primes);
 
         let mut initial_registers = Vec::new();
         initial_registers.resize(primes.len(), 0);
@@ -64,8 +65,15 @@ impl Register {
             let idx = primes.iter().position(|&x| x == prime).unwrap();
             initial_registers[idx] = amt;
         }
-        let output_idx = primes.iter().position(|&x| x == self.output_prime).unwrap();
-        return (initial_registers, instrs, output_idx);
+
+        let output_condition: HashMap<usize, u64> = Register::prime_factorize(self.output_base)
+            .iter()
+            .map(|(prime, amt) | (primes.iter().position(|&x| x == *prime).unwrap(), *amt))
+            .collect();
+
+        println!("Prime layout: {:?}", primes);
+        println!("Output condition: {:?}", output_condition);
+        return (initial_registers, instrs, output_condition);
     }
 }
 
@@ -74,11 +82,11 @@ impl IntoIterator for Register {
     type IntoIter = RegisterIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        let (registers, instructions, output_register) = self.convert();
+        let (registers, instructions, output_condition) = self.convert();
         RegisterIter {
             instructions,
             registers,
-            output_register,
+            output_condition,
         }
     }
 }
@@ -86,7 +94,7 @@ impl IntoIterator for Register {
 pub struct RegisterIter {
     instructions: Vec<Instruction>,
     registers: Vec<u64>,
-    output_register: usize,
+    output_condition: HashMap<usize, u64>,
 }
 
 // impl RegisterIter {
@@ -121,13 +129,35 @@ impl Iterator for RegisterIter {
                     break;
                 }
             }
-            if self
+
+            // Output condition checking
+            // Check that all other registers are 0
+            if !self
                 .registers
                 .iter()
                 .enumerate()
-                .all(|(idx, val)| idx == self.output_register || *val == 0)
-            {
-                return Some(self.registers[self.output_register]);
+                .all(|(idx, val)| 
+                    self.output_condition.contains_key(&idx) 
+                    || *val == 0
+            ) {   
+                continue 
+            }
+            
+            // Check that the condition registers are multiples of the condition amounts
+            if !self.output_condition
+                .iter()
+                .all(|(idx, cond)| self.registers[*idx] % cond == 0
+            ) {
+                continue;
+            }
+
+            // Check that condition registers are the _same_ multipel of the condition amounts 
+            let mut xs = self.output_condition
+                .iter()
+                .map(|(idx, cond)| self.registers[*idx] / cond);
+            let first = xs.next().unwrap();
+            if xs.all(|y| y == first) {
+                return Some(first);
             }
         }
     }

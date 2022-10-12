@@ -1,4 +1,4 @@
-pub type FracSize = u8;
+pub type FracSize = u16;
 
 #[derive(Debug)]
 pub struct Program {
@@ -26,6 +26,23 @@ impl Program {
                 (55, 1),
             ],
             initial: 2,
+        }
+    }
+
+    pub fn primes_optimized() -> Program {
+        Program {
+            fractions: vec![
+                (3, 11),
+                (847, 45),
+                (143, 6),
+                (7, 3),
+                (10, 91),
+                (3, 7),
+                (36, 325),
+                (1, 2),
+                (36, 5),
+            ],
+            initial: 10,
         }
     }
 }
