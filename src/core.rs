@@ -1,5 +1,6 @@
 pub type FracSize = u8;
 
+#[derive(Debug)]
 pub struct Program {
     pub fractions: Vec<(FracSize, FracSize)>,
     pub initial: u64,

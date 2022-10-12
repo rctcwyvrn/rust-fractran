@@ -6,6 +6,7 @@ use anyhow::Ok;
 use anyhow::Result;
 use engines::basic;
 use engines::basic::Basic;
+use engines::register::Register;
 
 mod core;
 mod engines;
@@ -37,7 +38,20 @@ fn execute_basic_engine() {
     }
 }
 
+fn execute_register_engine() {
+    let engine = Register {
+        program: Program::primes(),
+        output_prime: 2,
+    };
+    let n = 200;
+    println!("N = {}", n);
+    for val in engine.into_iter().take(n) {
+        print!("{:?},", val);
+    }
+}
+
 fn main() -> Result<()> {
-    execute_basic_engine();
+    // execute_basic_engine();
+    execute_register_engine();
     return Ok(());
 }
