@@ -1,11 +1,24 @@
+use core::panic;
+
 use num_bigint::{BigUint, ToBigUint};
 
-use crate::core::{FracSize, FractranEngine, Log, Value, Program};
+use crate::core::{FracSize, FractranEngine, Program};
 use num_traits::identities::Zero;
 
-const MAX_CYCLES: i32 = 10000000;
 pub struct Basic {
     pub program: Program,
+}
+
+#[derive(Debug, Clone)]
+pub enum Value {
+    Small(u64),
+    Big(BigUint),
+}
+
+impl From<u64> for Value {
+    fn from(x: u64) -> Self {
+        Value::Small(x)
+    }
 }
 
 impl Value {
@@ -17,7 +30,6 @@ impl Value {
     }
 
     fn mult(&mut self, num: FracSize, denom: FracSize) {
-        // no bigint demotion cuz im lazy
         match self {
             Value::Small(x) => {
                 let y = (*x / denom as u64).checked_mul(num as u64);
@@ -31,6 +43,14 @@ impl Value {
             Value::Big(x) => {
                 *x *= num.to_biguint().unwrap();
                 *x /= denom.to_biguint().unwrap();
+
+                // Random demotion heuristic
+                // if its 32 bits there's probably a good amount of room
+                if x.bits() <= 32 {
+                    let y = x.to_u64_digits();
+                    debug_assert!(y.len() == 1);
+                    *self = Value::Small(y[0]);
+                }
             }
         }
     }
@@ -45,9 +65,9 @@ pub struct BasicIter {
 impl BasicIter {
     fn from(engine: Basic) -> BasicIter {
         BasicIter {
-            n: engine.program.initial.clone(),
+            n: Value::from(engine.program.initial),
             program: engine.program,
-            cycles: 0
+            cycles: 0,
         }
     }
 }
@@ -79,4 +99,4 @@ impl IntoIterator for Basic {
     }
 }
 
-impl FractranEngine for Basic {}
+impl FractranEngine<Value> for Basic {}

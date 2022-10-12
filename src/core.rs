@@ -1,11 +1,8 @@
-use anyhow::Result;
-use num_bigint::BigUint;
-
 pub type FracSize = u8;
 
 pub struct Program {
     pub fractions: Vec<(FracSize, FracSize)>,
-    pub initial: Value,
+    pub initial: u64,
 }
 
 impl Program {
@@ -27,27 +24,18 @@ impl Program {
                 (15, 2),
                 (55, 1),
             ],
-            initial: Value::from(2),
+            initial: 2,
         }
     }
 }
 
-#[derive(Debug, Clone)]
-pub enum Value {
-    Small(u64),
-    Big(BigUint),
-}
+// #[derive(Debug)]
+// pub struct Log {
+//     pub output: Vec<Value>,
+// }
 
-impl From<u64> for Value {
-    fn from(x: u64) -> Self {
-        Value::Small(x)
-    }
-}
-
-#[derive(Debug)]
-pub struct Log {
-    pub output: Vec<Value>,
-}
-
-pub trait FractranEngine: IntoIterator<Item = Value> {
+pub trait FractranEngine<Value>: IntoIterator<Item = Value>
+where
+    Value: From<u64>,
+{
 }
