@@ -68,7 +68,7 @@ impl Register {
 
         let output_condition: HashMap<usize, u64> = Register::prime_factorize(self.output_base)
             .iter()
-            .map(|(prime, amt) | (primes.iter().position(|&x| x == *prime).unwrap(), *amt))
+            .map(|(prime, amt)| (primes.iter().position(|&x| x == *prime).unwrap(), *amt))
             .collect();
 
         println!("Prime layout: {:?}", primes);
@@ -136,23 +136,23 @@ impl Iterator for RegisterIter {
                 .registers
                 .iter()
                 .enumerate()
-                .all(|(idx, val)| 
-                    self.output_condition.contains_key(&idx) 
-                    || *val == 0
-            ) {   
-                continue 
-            }
-            
-            // Check that the condition registers are multiples of the condition amounts
-            if !self.output_condition
-                .iter()
-                .all(|(idx, cond)| self.registers[*idx] % cond == 0
-            ) {
+                .all(|(idx, val)| self.output_condition.contains_key(&idx) || *val == 0)
+            {
                 continue;
             }
 
-            // Check that condition registers are the _same_ multipel of the condition amounts 
-            let mut xs = self.output_condition
+            // Check that the condition registers are multiples of the condition amounts
+            if !self
+                .output_condition
+                .iter()
+                .all(|(idx, cond)| self.registers[*idx] % cond == 0)
+            {
+                continue;
+            }
+
+            // Check that condition registers are the _same_ multipel of the condition amounts
+            let mut xs = self
+                .output_condition
                 .iter()
                 .map(|(idx, cond)| self.registers[*idx] / cond);
             let first = xs.next().unwrap();

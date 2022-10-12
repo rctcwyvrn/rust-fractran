@@ -40,12 +40,12 @@ fn execute_basic_engine() {
 
 fn execute_register_engine() {
     let engine = Register {
-        program: Program::primes_optimized(), 
+        program: Program::primes_optimized(),
         output_base: 10,
         // program: Program::primes(),
         // output_base: 2
     };
-    let n =  250;
+    let n = 250;
     println!("N = {}", n);
     for val in engine.into_iter().take(n) {
         print!("{:?},", val);
