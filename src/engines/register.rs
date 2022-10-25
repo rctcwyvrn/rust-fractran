@@ -71,8 +71,8 @@ impl Register {
             .map(|(prime, amt)| (primes.iter().position(|&x| x == *prime).unwrap(), *amt))
             .collect();
 
-        println!("Prime layout: {:?}", primes);
-        println!("Output condition: {:?}", output_condition);
+        // println!("Prime layout: {:?}", primes);
+        // println!("Output condition: {:?}", output_condition);
         return (initial_registers, instrs, output_condition);
     }
 }

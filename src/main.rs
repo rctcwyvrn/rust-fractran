@@ -52,8 +52,22 @@ fn execute_register_engine() {
     }
 }
 
+fn execute_fib() {
+    for i in 1..15 {
+        let engine = Register {
+            program: Program::fibonacci(i),
+            output_base: 2,
+        };
+        let n = 1;
+        for val in engine.into_iter().take(n) {
+            print!("{:?},", val);
+        }
+    }
+}
+
 fn main() -> Result<()> {
     // execute_basic_engine();
-    execute_register_engine();
+    // execute_register_engine();
+    execute_fib();
     return Ok(());
 }
